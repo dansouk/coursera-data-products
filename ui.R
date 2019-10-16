@@ -1,36 +1,29 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 
-# Define UI for application that draws a histogram
 shinyUI(fluidPage(
 
     # Application title
-    titlePanel("Old Faithful Geyser Data"),
+    titlePanel("Loan Application Pre-screening"),
 
-    # Sidebar with a slider input for number of bins
+    # Sidebar
     sidebarLayout(
         sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 100,
-                        value = 30),
-            tags$p("This is a simple UI to demonstrate how a basic histogram can help uncover patterns in data. 
-                   Simply adjust the slider bar to change the number of bins (groups). 
-                   Notice that data appears to cluster around 50 and 80 minutes for all but the fewest number of bins.")
+            numericInput("income", "Monthly income", 0)
+            , numericInput("loanamount", "Loan amount", 0)
+            , numericInput("repaymentperiod", "Repayment period (months)", 12, 60, step = 6)
+            , numericInput("otherdebt", "Total monthly payments on other debts", 0)
+            , numericInput("currentchkbal", "What is the approximate current balance of your checking account?", 0)
+            , checkboxInput("overdrawn", "Has your checking account been overdrawn in the last year?", value = FALSE)
+            , checkboxInput("everdefault", "Have you ever defaulted on any debt in the last two years?", value = FALSE)
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
-            plotOutput("distPlot")
+            tags$p("This app provides the ability to quickly screen a loan applicant.
+                     Enter and/or adjust responses to the questions to see if an application is likely to be approved.")
+            , tags$br()
+            , tags$br()
+            , textOutput("app_status")
         )
     )
 )

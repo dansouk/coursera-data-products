@@ -1,26 +1,62 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 
-# Define server logic required to draw a histogram
+# Define server logic required to compute approval likelihood
 shinyServer(function(input, output) {
 
-    output$distPlot <- renderPlot({
+    output$app_status <- renderText({
 
-        # generate bins based on input$bins from ui.R
-        delay    <- faithful[, 2] / 60
-        bins <- seq(min(delay), max(delay), length.out = input$bins + 1)
+        # Calculate 'score' using a simple multiple regression model
+        score = 0
+        
+        if (input$income == 0)
+            rate = 0
+        else
+            rate = (((input$otherdebt * 12) + input$loanamount) / (input$income * 12))
 
-        # draw the histogram with the specified number of bins
-        hist(delay, breaks = bins, col = 'darkgray', border = 'white', xlab = 'Hours until next eruption')
-
+        if (rate > 0)
+        {
+            if (rate < .5)
+                score = score + 25 #InstallmentRatePercentage
+            if (rate < .4)
+                score = score + 15
+            if (rate < .3)
+                score = score + 10
+            if (input$repaymentperiod > 60)
+                score = score - 10
+            if (input$overdrawn)
+                score = score - 5
+            if (input$everdefault)
+                score = score - 10
+            if (input$currentchkbal > 0)
+                score = score + 5
+            if (input$currentchkbal > 100)
+                score = score + 5
+            if (input$currentchkbal > 500)
+                score = score + 5
+            if (input$currentchkbal > 1000)
+                score = score + 10
+            
+            score = score * 10
+        }
+        
+        if (score <= 0)
+        {
+            score = 0
+            msg = ''
+        }
+        else
+        {
+            if (score < 500)
+                msg = "This loan is not likely to be approved"
+            
+            if (score >= 500 & score < 750)
+                msg = "This loan is likely to be approved, but not gauranteed"
+    
+            if (score >= 750)
+                msg = "This loan is very likely to be approved, but not gauranteed"
+        }
+        
+        return(msg)
     })
 
 })
